@@ -43,10 +43,12 @@ INSTALLED_APPS = [
     'api'
 
 ]
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
 ]
-ALLOWED_HOSTS = ['10.0.2.2','10.0.3.2', '127.0.0.1']
+
+ALLOWED_HOSTS = ['*']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
