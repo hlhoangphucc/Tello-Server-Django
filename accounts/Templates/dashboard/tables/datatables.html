@@ -1,0 +1,73 @@
+{% extends 'dashboard/index.html' %} {% block content %}
+<div class="main-panel">
+  <div class="content">
+    <div class="page-inner">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              <h4 class="card-title">Managerment Accounts</h4>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table
+                  id="basic-datatables"
+                  class="display table table-striped table-hover"
+                >
+                  <thead>
+                    <tr>
+                      <th>Id</th>
+                      <th>Username</th>
+                      <th>Email</th>
+                      <th>Last Login</th>
+                      <th>Date Join</th>
+                      <th>Function</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {% for user in all_users %}
+                    <tr>
+                      <td>{{ user.id }}</td>
+                      <td>{{ user.username }}</td>
+                      <td>{{ user.email }}</td>
+                      <td>{{ user.last_login }}</td>
+                      <td>{{ user.date_joined }}</td>
+                      <td>
+                        <a href="{% url 'edit_users' user.id %}">Edit</a>
+                        <a href="{% url 'del_users' user.id %}">Delete</a>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="container-fluid">
+      <nav class="pull-left">
+        <ul class="nav">
+          <li class="nav-item">
+            <a class="nav-link" href="https://www.themekita.com"> ThemeKita </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#"> Help </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#"> Licenses </a>
+          </li>
+        </ul>
+      </nav>
+      <div class="copyright ml-auto">
+        2018, made with <i class="fa fa-heart heart text-danger"></i> by
+        <a href="https://www.themekita.com">ThemeKita</a>
+      </div>
+    </div>
+  </footer>
+</div>
+{% endblock %}
