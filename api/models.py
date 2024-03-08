@@ -90,13 +90,12 @@ class Posts(models.Model):
 
 
 class Interact(models.Model):
-    post_id = models.OneToOneField(
+    post_id = models.ForeignKey(
         Posts,
         on_delete=models.CASCADE,
         db_column="post_id",
         max_length=255,
         default="",
-        primary_key=True,
     )
     user_id = models.ForeignKey(
         InfoUser, on_delete=models.CASCADE, db_column="user_id", default=0
@@ -104,7 +103,7 @@ class Interact(models.Model):
     updated_at = models.DateTimeField()
 
     class Meta:
-        db_table = "interact"
+        db_table = "interacts"
 
 
 class Comments(models.Model):

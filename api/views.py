@@ -38,32 +38,37 @@ from django.db.models import Q
 @api_view(["POST"])
 def signup(request):
     serializer = UserSerializer(data=request.data)
-
     if serializer.is_valid():
-        serializer.save()
-        user = User.objects.get(username=request.data["username"])
-        user.set_password(request.data["password"])
-        user.save()
-        info_user = InfoUser.objects.create(
-            user_id=user.id,
-            user_name=user.username,
-            phone=request.data["phone"],
-            email=user.email,
-            gender="nam",
-            created_time=user.date_joined,
-            online_time=user.date_joined,
-            bg_url="null",
-            avt_url="null",
-        )
-
-        token = Token.objects.create(user=user)
-        return Response({"token": token.key, "user": serializer.data})
-    return Response(serializer.errors, status=status.HTTP_200_OK)
+        # Kiểm tra xem email đã tồn tại chưa
+        if InfoUser.objects.filter(email=request.data["email"]).exists():
+            return Response(
+                {"error": "Email đã tồn tại"}, status=status.HTTP_409_CONFLICT
+            )
+        else:
+            serializer.save()
+            user = User.objects.get(username=request.data["username"])
+            user.set_password(request.data["password"])
+            user.save()
+            info_user = InfoUser.objects.create(
+                user_id=user.id,
+                user_name=user.username,
+                phone=request.data["phone"],
+                email=user.email,
+                gender="nam",
+                created_time=user.date_joined,
+                online_time=user.date_joined,
+                bg_url="null",
+                avt_url="null",
+            )
+            token = Token.objects.create(user=user)
+            return Response({"token": token.key, "user": serializer.data})
+    else:
+        return Response({"error": "Email đã tồn tại"}, status=status.HTTP_409_CONFLICT)
 
 
 @api_view(["POST"])
 def login(request):
-    user = get_object_or_404(User, username=request.data["username"])
+    user = get_object_or_404(User, email=request.data["email"])
     if not user.check_password(request.data["password"]):
         return Response("missing user", status=status.HTTP_404_NOT_FOUND)
     token, created = Token.objects.get_or_create(user=user)
@@ -86,7 +91,7 @@ def get_all_user(request):
 
 def get_user(request, user_id):
     try:
-        user = InfoUser.objects.get(user_id=user_id)
+        user = InfoUser.objects.filter(user_id=user_id)
         users_data = list(user.values())
         return JsonResponse({"user": users_data})
     except InfoUser.DoesNotExist:
@@ -261,7 +266,9 @@ def GetAllPost(request, *args, **kwargs):
     followed_users = Follows.objects.filter(my_user_id=user_id)[:1].values_list(
         "other_user_id", flat=True
     )
-
+    user_name = InfoUser.objects.filter(user_id=user_id)[:1].values_list(
+        "user_name", flat=True
+    )
     posts_with_interact_count = (
         Posts.objects.filter(Q(user_id=user_id) | Q(user_id__in=followed_users))
         .annotate(
@@ -281,13 +288,14 @@ def GetAllPost(request, *args, **kwargs):
         interact_user_ids = Interact.objects.filter(post_id=post.post_id).values_list(
             "user_id", flat=True
         )
+        user_name = InfoUser.objects.filter(user_id=post.user_id.user_id).first()
         avt_user_info = InfoUser.objects.filter(user_id=post.user_id.user_id).first()
         avt_url = avt_user_info.avt_url if avt_user_info else None
         post_info = {
             "post_id": post.post_id,
             "text_post": post.text_post,
             "media_post": post.media_post,
-            "user_name": post.user_name,
+            "user_name": user_name.user_name,
             "avt_user": avt_url,
             "post_time": post.post_time,
             "post_type": post.post_type,
@@ -335,13 +343,14 @@ def GetPostFromUser(request, *args, **kwargs):
         interact_user_ids = Interact.objects.filter(post_id=post.post_id).values_list(
             "user_id", flat=True
         )
+        user_name = InfoUser.objects.filter(user_id=post.user_id.user_id).first()
         avt_user_info = InfoUser.objects.filter(user_id=post.user_id.user_id).first()
         avt_url = avt_user_info.avt_url if avt_user_info else None
         post_info = {
             "post_id": post.post_id,
             "text_post": post.text_post,
             "media_post": post.media_post,
-            "user_name": post.user_name,
+            "user_name": user_name.user_name,
             "avt_user": avt_url,
             "post_time": post.post_time,
             "post_type": post.post_type,

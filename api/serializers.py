@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-from api.models import InfoUser, Message, Posts, User
+from api.models import InfoUser, Message, Posts
 
 
 class UserSerializer(serializers.ModelSerializer):
